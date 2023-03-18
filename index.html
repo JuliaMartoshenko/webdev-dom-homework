@@ -76,8 +76,8 @@
     const inputNameElement = document.getElementById('name-input');
     const inputTextElement = document.getElementById('text-input');
     buttonElement.disabled = true;
-    inputNameElement.addEventListener('keypress', () => {
-      inputTextElement.addEventListener('keypress', () => {
+    inputNameElement.addEventListener('input', () => {
+      inputTextElement.addEventListener('input', () => {
         buttonElement.disabled = false;
       })   
     })
