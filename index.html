@@ -75,15 +75,19 @@
     const listElement = document.getElementById('list');
     const inputNameElement = document.getElementById('name-input');
     const inputTextElement = document.getElementById('text-input');
+    buttonElement.disabled = true;
+    inputNameElement.addEventListener('keypress', () => {
+      inputTextElement.addEventListener('keypress', () => {
+        buttonElement.disabled = false;
+      })   
+    })
 
     buttonElement.addEventListener('click', () => {
-      //валидация ввода
-      inputNameElement.classList.remove('error');
+      //валидация ввода;
       if (inputNameElement.value === ''){
-        inputNameElement.classList.add("error");
         return;
       }
-      //создание текущей даты
+      //создание текущей даты в необходимом формате
       const options = {
         day: '2-digit',
         month: '2-digit',
@@ -93,7 +97,7 @@
       };
       currentDate = new Date().toLocaleDateString('ru-RU', options).replace(',', '');
       
-      
+      //
 
       //изменение html
       const oldHtml = listElement.innerHTML;
@@ -114,6 +118,7 @@
             </div>
           </div>
     `;
+    
     //очистка форм ввода
     inputNameElement.value = '';
     inputTextElement.value = '';
