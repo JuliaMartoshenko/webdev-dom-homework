@@ -63,18 +63,14 @@
       </div>
     </div>
   </body>
-  <style>
-    .error {
-      background-color: red;
-    }
-  </style>
   <script>
 
-    //Добавление нового комментария
     const buttonElement = document.getElementById('add-button');
     const listElement = document.getElementById('list');
     const inputNameElement = document.getElementById('name-input');
     const inputTextElement = document.getElementById('text-input');
+
+    //Включение и выключение кнопки "Написать"
     buttonElement.disabled = true;
     inputNameElement.addEventListener('input', () => {
       inputTextElement.addEventListener('input', () => {
@@ -82,11 +78,15 @@
       })   
     })
 
-    buttonElement.addEventListener('click', () => {
-      //валидация ввода;
-      if (inputNameElement.value === ''){
-        return;
+    //Обработка события при нажатии на кнопку Enter - добавление комментария
+    document.addEventListener('keyup', (e) => {
+      if (e.code === 'Enter') {
+        buttonElement.click();
       }
+    })
+  
+    //Обработка события при нажатии на кнопку "Написать" - добавление комментария
+    buttonElement.addEventListener('click', () => {
       //создание текущей даты в необходимом формате
       const options = {
         day: '2-digit',
@@ -96,8 +96,6 @@
         minute: '2-digit',
       };
       currentDate = new Date().toLocaleDateString('ru-RU', options).replace(',', '');
-      
-      //
 
       //изменение html
       const oldHtml = listElement.innerHTML;
@@ -122,6 +120,7 @@
     //очистка форм ввода
     inputNameElement.value = '';
     inputTextElement.value = '';
+    buttonElement.disabled = true;
     })
 
   </script>
