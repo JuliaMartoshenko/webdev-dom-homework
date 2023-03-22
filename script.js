@@ -5,25 +5,30 @@ const inputTextElement = document.getElementById('text-input');
 comments = [];
 
 //Запрос данных из API
-fetch('https://webdev-hw-api.vercel.app/api/v1/yuliya-martoshenko/comments', {
-    method: 'GET',
-})
-    .then((response) => {
-        return response.json();
+const getAPI = () => {
+    fetch('https://webdev-hw-api.vercel.app/api/v1/yuliya-martoshenko/comments', {
+        method: 'GET',
     })
-    .then((responseData) => {
-        comments = responseData.comments.map((comment) => {
-            return {
-                name: comment.author.name,
-                date: new Date(comment.date),
-                text: comment.text,
-                likes: comment.likes,
-                isLike: comment.isLiked,
-            }
-        });
-        console.log(comments);
-        renderComments();
-    })
+        .then((response) => {
+            return response.json();
+        })
+        .then((responseData) => {
+            comments = responseData.comments.map((comment) => {
+                return {
+                    name: comment.author.name,
+                    date: new Date(comment.date),
+                    text: comment.text,
+                    likes: comment.likes,
+                    isLike: comment.isLiked,
+                }
+            });
+            console.log(comments);
+            renderComments();
+        })
+}
+
+
+getAPI();
 
 //рендер данных
 const renderComments = () => {
@@ -94,25 +99,22 @@ buttonElement.addEventListener('click', () => {
     };
     currentDate = new Date().toLocaleDateString('ru-RU', options).replace(',', '');
 
-
-    //Добавление нового элемента в список
-    comments.push(
-        {
-            name: inputNameElement.value
-                .replaceAll("&", "&amp;")
-                .replaceAll("<", "&lt;")
-                .replaceAll(">", "&gt;")
-                .replaceAll('"', "&quot;"),
-            date: currentDate,
+    //Отправка данных в API
+    fetch("https://webdev-hw-api.vercel.app/api/v1/yuliya-martoshenko/comments", {
+        method: "POST",
+        body: JSON.stringify({
+            name: inputNameElement.value,
             text: inputTextElement.value
-                .replaceAll("&", "&amp;")
-                .replaceAll("<", "&lt;")
-                .replaceAll(">", "&gt;")
-                .replaceAll('"', "&quot;"),
-            likes: 0,
-            isLike: false,
-        }
-    )
+        })
+    }).then((response) => {
+        response.json().then((responseData) => {
+            // получили данные и рендерим их в приложении
+            tasks = responseData.comments;
+            renderComments();
+            getAPI();
+        });
+    });
+
     renderComments();
     initButtonLikeListeners();
 
