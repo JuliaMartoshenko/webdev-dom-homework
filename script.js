@@ -8,17 +8,21 @@ const comments = [
         name: 'Глеб Фокин',
         date: '12.02.22 12:18',
         text: 'Это будет первый комментарий на этой странице',
+        likes: 3,
+        isLike: false,
     },
     {
         name: 'Варвара Н.',
         date: '13.02.22 19:22',
         text: 'Мне нравится как оформлена эта страница! ❤',
+        likes: 75,
+        isLike: true,
     },
 ]
 
 //рендер данных
 const renderComments = () => {
-    const commentsHtml = comments.map((comment) => {
+    const commentsHtml = comments.map((comment, index) => {
         return `<li class="comment">
         <div class="comment-header">
           <div>${comment.name}</div>
@@ -31,8 +35,8 @@ const renderComments = () => {
         </div>
         <div class="comment-footer">
           <div class="likes">
-            <span class="likes-counter">0</span>
-            <button class="like-button"></button>
+            <span class="likes-counter">${comment.likes}</span>
+            <button data-index=${index} class=${comment.isLike ? "'like-button -active-like'" : "'like-button'"}></button>
           </div>
         </div>
   `
@@ -40,19 +44,22 @@ const renderComments = () => {
     listElement.innerHTML = commentsHtml;
 }
 
-renderComments();
-
 //Инициализация лайков
 const initButtonLikeListeners = () => {
     const likeButtonElements = document.querySelectorAll('.like-button');
     for (const likeButtonElement of likeButtonElements) {
         likeButtonElement.addEventListener('click', () => {
-            console.log('1');
+            event.stopPropagation();
+            const index = likeButtonElement.dataset.index;
+            comments[index].isLike ? comments[index].likes-- : comments[index].likes++;
+            comments[index].isLike = !comments[index].isLike;
+            renderComments();
+            initButtonLikeListeners();
         })
     }
 }
 
-//initEventListeners();
+renderComments();
 initButtonLikeListeners();
 
 //Включение и выключение кнопки "Написать"
@@ -83,19 +90,26 @@ buttonElement.addEventListener('click', () => {
     currentDate = new Date().toLocaleDateString('ru-RU', options).replace(',', '');
 
 
-
-    //Добавление нового элемента
+    //Добавление нового элемента в список
     comments.push(
         {
-            name: inputNameElement.value,
+            name: inputNameElement.value
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;"),
             date: currentDate,
-            text: inputTextElement.value,
+            text: inputTextElement.value
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;"),
+            likes: 0,
+            isLike: false,
         }
     )
-    console.log(comments);
     renderComments();
     initButtonLikeListeners();
-
 
 
     //очистка форм ввода
