@@ -4,32 +4,6 @@ const inputNameElement = document.getElementById('name-input');
 const inputTextElement = document.getElementById('text-input');
 comments = [];
 
-//Запрос данных из API
-const getAPI = () => {
-    fetch('https://webdev-hw-api.vercel.app/api/v1/yuliya-martoshenko/comments', {
-        method: 'GET',
-    })
-        .then((response) => {
-            return response.json();
-        })
-        .then((responseData) => {
-            comments = responseData.comments.map((comment) => {
-                return {
-                    name: comment.author.name,
-                    date: new Date(comment.date),
-                    text: comment.text,
-                    likes: comment.likes,
-                    isLike: comment.isLiked,
-                }
-            });
-            console.log(comments);
-            renderComments();
-        })
-}
-
-
-getAPI();
-
 //рендер данных
 const renderComments = () => {
     const commentsHtml = comments.map((comment, index) => {
@@ -46,7 +20,7 @@ const renderComments = () => {
         <div class="comment-footer">
           <div class="likes">
             <span class="likes-counter">${comment.likes}</span>
-            <button data-index=${index} class=${comment.isLike ? "'like-button -active-like'" : "'like-button'"}></button>
+            <button data-index=${index} class=${comment.isLiked ? "'like-button -active-like'" : "'like-button'"}></button>
           </div>
         </div>
   `
@@ -54,31 +28,61 @@ const renderComments = () => {
     listElement.innerHTML = commentsHtml;
 }
 
-//Инициализация лайков
+//Запрос данных из API
+const getAPI = () => {
+    fetch('https://webdev-hw-api.vercel.app/api/v1/yuliya-martoshenko/comments', {
+        method: 'GET',
+    })
+        .then((response) => {
+            return response;
+        })
+        .then((response) => {
+            return response.json();
+        })
+        .then((responseData) => {
+            comments = responseData.comments.map((comment) => {
+                return {
+                    id: comment.id,
+                    name: comment.author.name,
+                    date: new Date(comment.date),
+                    text: comment.text,
+                    likes: comment.likes,
+                    isLiked: comment.isLiked,
+                }
+            });
+            renderComments();
+            initButtonLikeListeners();
+        })
+}
+
+//Обработка события при нажатии на кнопку лайк
 const initButtonLikeListeners = () => {
     const likeButtonElements = document.querySelectorAll('.like-button');
     for (const likeButtonElement of likeButtonElements) {
         likeButtonElement.addEventListener('click', () => {
-            event.stopPropagation();
             const index = likeButtonElement.dataset.index;
-            comments[index].isLike ? comments[index].likes-- : comments[index].likes++;
-            comments[index].isLike = !comments[index].isLike;
+            comments[index].isLiked ? comments[index].likes-- : comments[index].likes++;
+            comments[index].isLiked = !comments[index].isLiked;
             renderComments();
             initButtonLikeListeners();
         })
     }
 }
 
-renderComments();
-initButtonLikeListeners();
-
 //Включение и выключение кнопки "Написать"
-buttonElement.disabled = true;
-inputNameElement.addEventListener('input', () => {
-    inputTextElement.addEventListener('input', () => {
-        buttonElement.disabled = false;
+const buttonDisable = () => {
+    buttonElement.disabled = true;
+    inputNameElement.addEventListener('input', () => {
+        inputTextElement.addEventListener('input', () => {
+            buttonElement.disabled = false;
+        })
     })
-})
+}
+
+getAPI();
+buttonDisable();
+
+
 
 //Обработка события при нажатии на кнопку Enter - добавление комментария
 document.addEventListener('keyup', (e) => {
@@ -89,31 +93,24 @@ document.addEventListener('keyup', (e) => {
 
 //Обработка события при нажатии на кнопку "Написать" - добавление комментария
 buttonElement.addEventListener('click', () => {
-    //создание текущей даты в необходимом формате
-    const options = {
-        day: '2-digit',
-        month: '2-digit',
-        year: '2-digit',
-        hour: 'numeric',
-        minute: '2-digit',
-    };
-    currentDate = new Date().toLocaleDateString('ru-RU', options).replace(',', '');
-
+    //buttonElement.disabled = true;
     //Отправка данных в API
     fetch("https://webdev-hw-api.vercel.app/api/v1/yuliya-martoshenko/comments", {
         method: "POST",
         body: JSON.stringify({
             name: inputNameElement.value,
-            text: inputTextElement.value
+            text: inputTextElement.value,
         })
-    }).then((response) => {
-        response.json().then((responseData) => {
+    })
+        .then((response) => {
+            return response.json()
+        })
+        .then((responseData) => {
             // получили данные и рендерим их в приложении
             tasks = responseData.comments;
-            renderComments();
+            buttonElement.disabled = false;
             getAPI();
         });
-    });
 
     renderComments();
     initButtonLikeListeners();
